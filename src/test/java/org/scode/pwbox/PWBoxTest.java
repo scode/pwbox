@@ -128,7 +128,7 @@ public class PWBoxTest {
             }
             System.out.println("ENC-HEX:" + hex);
         } else {
-            String hex = "5057426f7800d5e9110ce095587a11cfb321fa17aee252b2cb5546d3aa4a534d09cf3a13c005ef11bad92b9c4eeb980550b813530c8a4a4d23c955fc9be6e1ce5d316275a2ca72ee6bbcf9552b0920fe2734200ca7c57d341b5385bad775406f9c7964e492e03e9aa2fb000000000000003050d40faf4dd6594a87c95748978bc780db16316bc314752c8e62efd92040d7d5bb51b17b35d6509f7fb46a7671e0450c";
+            String hex = "5057426f7800dc7eb25ff2fb3dea4b28209692693681e1b8825f3522fea2c997f427815c7252ff2aa933fdbbf511aeeb591e4d804bbe3a28b2756c0df5ca0f864b48474e136fa8657ecd3a1c522c14a237cfa22dfb9a58039ed260f9b9d453acddfef576388abd6a9b1d00000000000000260743670b402be8a6b0c9c690d6e4902d269f464227630ddcbde5c59a73d4bedd7fca7bd900bc";
             byte[] encrypted = hex2bytes(hex);
             byte[] decrypted = box.decrypt(passphrase, encrypted);
             Assert.assertEquals(decrypted, plaintext);
