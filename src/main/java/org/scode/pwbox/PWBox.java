@@ -22,13 +22,16 @@ import java.util.Arrays;
  *     Byte 03:      'o' ASCII code
  *     Byte 04:      'x' ASCII code
  *     Byte 05:      0, indicating the zeroth version of the PWBox format
- *     Byte 06-21:   16 byte IV used for encryption
- *     Byte 22-53:   32 byte salt used for encryption key
- *     Byte 54-85:   32 byte salt used for HMAC key
- *     Byte 86-105:  20 bytes HMAC (SHA1) over iv + encryption key + encrypted text
- *     Byte 106-113: 8 bytes in DataOutputStream.writeLong() format of length of the remainder (for
+ *     Byte 06-21:   16 byte IV used for encrypting the passphrase marker
+ *     Byte 22-37:   16 byte IV used for encryption
+ *     Byte 38-69:   32 byte salt used for encrypting the passphrase marker
+ *     Byte 70-101:  32 byte salt used for encryption key
+ *     Byte 102-133: 32 byte salt used for HMAC key
+ *     Byte 134-153: 20 bytes HMAC (SHA1) over iv + encryption key + encrypted text
+ *     Byte 154-201: 48 byte encrypted passphrase marker
+ *     Byte 202-209: 8 bytes in DataOutputStream.writeLong() format of length of the remainder (for
  *                   truncation detection for user-friendly errors, not HMAC:ed).
- *     Byte 114-EOF: Encrypted text (AES/CBC/PKCS5PADDING)
+ *     Byte 210-EOF: Encrypted text (AES/CBC/PKCS5PADDING)
  * </code>
  *
  */
@@ -56,11 +59,22 @@ public class PWBox implements IPWBox {
      * so it's okay for the end-user that only needs to wait for a single key generation".
      */
     static final int PBE_ITERATION_COUNT = 10000;
-    
+
+    /**
+     * The known plaintext which is used to give a friendlier indication that the wrong passphrase was probably
+     * used.
+     */
+    static final String CORRECT_PASSPHRASE_MARKER = "it appears that the passphrase is correct";
+
+    /**
+     * The length of CORRECT_PASSPHRASE_MARKER when encrypted with our choise of keys and algorithms. Empirically
+     * observed and hard-coded.
+     */
+    static final int CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH = 48;
+
     static final String ENCRYPTION_ALGORITHM = "AES";
     static final String CIPHER_SPEC = "AES/CBC/PKCS5PADDING";
     static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
-
     static final String HMAC_ALGORITHM = "HmacSHA1";
 
     Key generateKey(String passphrase, byte[] salt) {
@@ -156,17 +170,24 @@ public class PWBox implements IPWBox {
             byte[] version = new byte[1];
             version[0] = 0; // Be explicit.
 
-            byte[] iv = this.generateIv();
+            byte[] pphraseIv = this.generateIv();
+            byte[] encIv = this.generateIv();
+            byte[] pphraseSalt = this.generateSalt();
             byte[] encSalt = this.generateSalt();
             byte[] macSalt = this.generateSalt();
 
+            Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
             Key encKey = this.generateKey(passphrase, encSalt);
             Key macKey = this.generateKey(passphrase, macSalt);
 
-            byte[] encText = this.encrypt(encKey, iv, plaintext);
+            byte[] pphraseText = this.encrypt(pphraseKey, pphraseIv, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"));
+            if (pphraseText.length != CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH) {
+                throw new PWBoxError("bug: encrypted correct passphrase marker not of expected length");
+            }
+            byte[] encText = this.encrypt(encKey, encIv, plaintext);
 
             ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
-            hmaced.write(iv);
+            hmaced.write(encIv);
             hmaced.write(encSalt);
             hmaced.write(encText);
             byte[] hmac = this.hmac(macKey, hmaced.toByteArray());
@@ -175,10 +196,13 @@ public class PWBox implements IPWBox {
             DataOutputStream dout = new DataOutputStream(bout);
             dout.write(magic);
             dout.write(version);
-            dout.write(iv);
+            dout.write(pphraseIv);
+            dout.write(encIv);
+            dout.write(pphraseSalt);
             dout.write(encSalt);
             dout.write(macSalt);
             dout.write(hmac);
+            dout.write(pphraseText);
             dout.writeLong(encText.length);
             dout.write(encText);
 
@@ -225,15 +249,30 @@ public class PWBox implements IPWBox {
                 throw new TruncatedException("truncated before format version could be read");
             }
 
-            byte[] iv = new byte[16];
+            byte[] pphraseIv = new byte[16];
+            byte[] encIv = new byte[16];
+            byte[] pphraseSalt = new byte[32];
             byte[] encSalt = new byte[32];
             byte[] macSalt = new byte[32];
             byte[] hmac = new byte[20];
+            byte[] encPphraseMarker = new byte[CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH];
 
             try {
-                din.readFully(iv);
+                din.readFully(pphraseIv);
             } catch (EOFException e) {
-                throw new TruncatedException("data truncated reading iv");
+                throw new TruncatedException("data truncated reading pphrase marker iv");
+            }
+
+            try {
+                din.readFully(encIv);
+            } catch (EOFException e) {
+                throw new TruncatedException("data truncated reading encryption iv");
+            }
+
+            try {
+                din.readFully(pphraseSalt);
+            } catch (EOFException e) {
+                throw new TruncatedException("data truncated reading pphrase marker salt");
             }
 
             try {
@@ -252,6 +291,12 @@ public class PWBox implements IPWBox {
                 din.readFully(hmac);
             } catch (EOFException e) {
                 throw new TruncatedException("data truncated reading hmac");
+            }
+
+            try {
+                din.readFully(encPphraseMarker);
+            } catch (EOFException e) {
+                throw new TruncatedException("data truncated reading passphrase marker");
             }
 
             long len;
@@ -280,11 +325,26 @@ public class PWBox implements IPWBox {
                 throw new TrailingGarbageException("expected EOF after reading " + len + " bytes of encrypted text (after header)");
             }
 
+            Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
             Key encKey = this.generateKey(passphrase, encSalt);
             Key macKey = this.generateKey(passphrase, macSalt);
 
+            try {
+                byte[] readPphraseMarker = this.decrypt(pphraseKey, pphraseIv, encPphraseMarker);
+                if (!Arrays.equals(readPphraseMarker, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"))) {
+                    throw new ProbablyBadPassphraseException();
+                }
+            } catch (PWBoxError e) {
+                // This is kind of bogus. One example of an exception we could get is javax.crypto.BadPadingException,
+                // instead of just getting back an incorrect passphrase. I do not like this variant since any bug
+                // that causes an exception would mean that we claim bad passphrase. However, this can be improved
+                // in a future version without changing the format (at least to the extent allowed by the Java API:s,
+                // which I have not investigated).
+                throw new ProbablyBadPassphraseException();
+            }
+
             ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
-            hmaced.write(iv);
+            hmaced.write(encIv);
             hmaced.write(encSalt);
             hmaced.write(encrypted);
             byte[] expectedHmac = this.hmac(macKey, hmaced.toByteArray());
@@ -292,7 +352,7 @@ public class PWBox implements IPWBox {
                 throw new InvalidHmacException("hmac did not match expectation - has data been tampered with? wrong passphrase?");
             }
 
-            return this.decrypt(encKey, iv, encrypted);
+            return this.decrypt(encKey, encIv, encrypted);
         } catch (UnsupportedEncodingException e) {
             throw new PWBoxError(e);
         } catch (IOException e) {

@@ -24,11 +24,6 @@ relelvant part).
 ## TODO
 
 * Fix error propagation; don't result in PWBoxError when PWBoxException is appropriate (structural changes only).
-* Consider that humans prefer to know whether they entered the wrong passphrase or the data was corrupt. I could
-  have a dedicated field which is stipulated to be a pre-defined phrase encrypted, and use that to test for a
-  bad passphrase. A tamperer would be able to trick the user into believing she has the wrong passphrase, but
-  the main purpose is to allow the common case to be friendlier: not to report tampering whenever the user
-  enters an incorrect passphrase.
 
 ## Requested feedback points
 

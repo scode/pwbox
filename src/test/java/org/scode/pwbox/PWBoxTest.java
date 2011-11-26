@@ -114,6 +114,21 @@ public class PWBoxTest {
     }
 
     @Test
+    public void badPassphrase() throws UnsupportedEncodingException, PWBoxException {
+        PWBox box = new PWBox();
+
+        byte[] encrypted = box.encrypt("passphrase", "secret".getBytes("UTF-8"));
+        box.decrypt("passphrase", encrypted);
+
+        try {
+            box.decrypt("bad passphrase", encrypted);
+            throw new AssertionError("decryption should have failed");
+        } catch (ProbablyBadPassphraseException e) {
+            // ok
+        }
+    }
+
+    @Test
     public void decryptOld() throws UnsupportedEncodingException, PWBoxException {
         PWBox box = new PWBox();
 
@@ -128,7 +143,7 @@ public class PWBoxTest {
             }
             System.out.println("ENC-HEX:" + hex);
         } else {
-            String hex = "5057426f7800d5e9110ce095587a11cfb321fa17aee252b2cb5546d3aa4a534d09cf3a13c005ef11bad92b9c4eeb980550b813530c8a4a4d23c955fc9be6e1ce5d316275a2ca72ee6bbcf9552b0920fe2734200ca7c57d341b5385bad775406f9c7964e492e03e9aa2fb000000000000003050d40faf4dd6594a87c95748978bc780db16316bc314752c8e62efd92040d7d5bb51b17b35d6509f7fb46a7671e0450c";
+            String hex = "5057426f780006a3f6d156fb856c2c0d14a7b2ff2dde71779dd5359b70c439610e22e6dcfb0538fb44bce0f7a5c1f0b6461955919b2809ce7215d256dc3376adad0efa004648ae6e9693811dd217ec55e0d3aedd35afb2a96e948f77a4780fe42c871650055a70638f36521f565a0f4fac646a1433c4bd65158c099d850113bca5f84d99c4ce46ab6fde06c810a2b835a27b79b134f56330f7de114318786883b36b78d1cc789057977315053b4f198f79ef75c4fcb503a7d765485da0174f99a3ce2cbfc2e1b10df68d0000000000000030ea1c7a6d590f17f7e3cf1835983308711b9a6367b9f57e155289deaa0e908a2fda508584ba285d21c563adee76382ed7";
             byte[] encrypted = hex2bytes(hex);
             byte[] decrypted = box.decrypt(passphrase, encrypted);
             Assert.assertEquals(decrypted, plaintext);
