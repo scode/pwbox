@@ -4,6 +4,9 @@ Until the above notice is removed and replaced by actual
 documentation, the only reason this code is public is to allow people
 to review the crypto stuff.
 
+Reviewers: See PWBox.java; it has a description of the format and the
+tiny implementation.
+
 ## What is it?
 
 An easy-to-use high-level abstraction (for the JVM) to accomplish a
@@ -15,7 +18,8 @@ use-cases). Code required to encrypt:
     byte[] data = box.encrypt("passphrase", "super secret data".getBytes("UTF-8"))
 
 I am currently looking for feedback on whether or not the format and
-implementation is cryptographically sound.
+implementation is cryptographically sound (see PWBox.java - the only
+relelvant part).
 
 ## TODO
 
@@ -27,6 +31,8 @@ implementation is cryptographically sound.
   enters an incorrect passphrase.
 
 ## Requested feedback points
+
+See PWBox.java.
 
 * Is it cryptographically safe to encrypt known plain text for wrong passphrase detection?
 
