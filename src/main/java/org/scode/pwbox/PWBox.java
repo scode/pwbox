@@ -58,15 +58,7 @@ public class PWBox implements IPWBox {
     static final int PBE_ITERATION_COUNT = 10000;
     
     static final String ENCRYPTION_ALGORITHM = "AES";
-
-    /**
-     * I chose CTR over CBC because it was indicated to me that CBC would leak more information in the event of
-     * a low-entropy IV.
-     *
-     * Given the premise of this library of small amounts of data, the potential for future parallel
-     * encryption/decryption is not relevant.
-     */
-    static final String CIPHER_SPEC = "AES/CTR/PKCS5PADDING";
+    static final String CIPHER_SPEC = "AES/CBC/PKCS5PADDING";
     static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
 
     static final String HMAC_ALGORITHM = "HmacSHA1";
