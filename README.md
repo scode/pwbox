@@ -4,6 +4,16 @@ Until the above notice is removed and replaced by actual
 documentation, the only reason this code is public is to allow people
 to review the crypto stuff.
 
+## What is it?
+
+An easy-to-use high-level abstraction to accomplish a single thing:
+password protected cryptographically sound storage of small amounts of
+data (suitable for keychains and similar use-cases). Code required to
+encrypt:
+
+  PWBox box = new PWBox();
+  byte[] data = box.encrypt("passphrase", "super secret data".getBytes("UTF-8"))
+
 ## TODO
 
 * Fix error propagation; don't result in PWBoxError when PWBoxException is appropriate (structural changes only).
