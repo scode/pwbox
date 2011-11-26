@@ -38,7 +38,7 @@ See PWBox.java.
 
 ## Feedback so far
 
-* Maybe use other than CBC (CTR?) to decrease reliance on IV entropy
+* (rejected; updated feedback is that CBC degrades better) Maybe use other than CBC (CTR?) to decrease reliance on IV entropy
 * And/or maybe use key stretching for the IV
 * Consider HMAC:ing plaintext instead of iv+salt+crypted.
 
