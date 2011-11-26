@@ -14,6 +14,9 @@ encrypt:
   PWBox box = new PWBox();
   byte[] data = box.encrypt("passphrase", "super secret data".getBytes("UTF-8"))
 
+I am currently looking for feedback on whether or not the format and
+implementation is cryptographically sound.
+
 ## TODO
 
 * Fix error propagation; don't result in PWBoxError when PWBoxException is appropriate (structural changes only).
