@@ -50,13 +50,15 @@ public class PWBox implements IPWBox {
 
     /**
      * The assumption of PWBox is that small amounts of data are being encrypted and decrypted, meaning that
-     * the performance penalty of a larger key is irrelevant. So, go with 256 bits.
+     * the performance penalty of a larger key is irrelevant. So, go with 256 bits (instead of 128).
      */
     static final int KEY_LENGTH_IN_BITS = 256;
 
     /**
-     * I chose 10000 based on ad-hoc performance measurements on my MacBook. Essentially, "unit tests still run fast,
-     * so it's okay for the end-user that only needs to wait for a single key generation".
+     * Key stretching iteration count. The higher the more resilience you get against bruce force attacks against
+     * a poor passphrase. I chose 10000 based on ad-hoc performance measurements on my MacBook. Essentially, "unit
+     * tests still run reasonably fast, so it's okay for the end-user that only needs to wait for a handful of
+     * key generations".
      */
     static final int PBE_ITERATION_COUNT = 10000;
 
@@ -67,14 +69,35 @@ public class PWBox implements IPWBox {
     static final String CORRECT_PASSPHRASE_MARKER = "it appears that the passphrase is correct";
 
     /**
-     * The length of CORRECT_PASSPHRASE_MARKER when encrypted with our choise of keys and algorithms. Empirically
+     * The length of CORRECT_PASSPHRASE_MARKER when encrypted with our choice of keys and algorithms. Empirically
      * observed and hard-coded.
      */
     static final int CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH = 48;
 
+    /**
+     * AES was chosen since it seems to be the currently preferred default choice. As a non-cryptographer, I see
+     * no reason to choose something else without a specific reason to.
+     */
     static final String ENCRYPTION_ALGORITHM = "AES";
+
+    /**
+     * CBC and CTR seem to be commonly preferred modes, and I did not want to diverge from commonly accepted
+     * defaults. One reason to choose CTR is the fact that it allows parallel encryption/decryption, but as the
+     * premise of this library is that small amounts of data are dealt with we do not care about that. Feedback
+     * I got indicated that CBC would degrade better in case of a low-entropy IV, so I stayed with that.
+     */
     static final String CIPHER_SPEC = "AES/CBC/PKCS5PADDING";
+
+    /**
+     * See http://en.wikipedia.org/wiki/PBKDF2 about PBKDF2. bcrypt and scrypt are supposed to be better, but I
+     * went with PBKDF2 because it's very established and because it's available by default in the JDK. Availability
+     * in the JDK goes for SHA1 too.
+     */
     static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
+
+    /**
+     * SHA1 due to availability of HmacSHA1 in JDK.
+     */
     static final String HMAC_ALGORITHM = "HmacSHA1";
 
     Key generateKey(String passphrase, byte[] salt) {
