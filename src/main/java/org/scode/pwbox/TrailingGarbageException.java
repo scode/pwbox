@@ -1,5 +1,11 @@
 package org.scode.pwbox;
 
+/**
+ * Indicates PWBox was successfully able to interpret an encrypted text, but there was left-over trailing
+ * garbage at the end.
+ *
+ * Note that malicious tampering or arbitrary corruption can trigger this exception.
+ */
 public class TrailingGarbageException extends PWBoxException {
     public TrailingGarbageException() {
     }

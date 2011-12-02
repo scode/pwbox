@@ -1,5 +1,10 @@
 package org.scode.pwbox;
 
+/**
+ * Indicates that PWBox was passed data which did not pass cryptographic integrity checking.
+ *
+ * This is intended to convey that the data has been corrupted or tampered with.
+ */
 public class InvalidHmacException extends PWBoxException {
     public InvalidHmacException() {
     }

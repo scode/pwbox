@@ -1,5 +1,8 @@
 package org.scode.pwbox;
 
+/**
+ * Common base class for PWBox specific errors that indicate an internal bug in PWBox or a dependent library.
+ */
 public class PWBoxError extends RuntimeException {
     public PWBoxError() {
     }

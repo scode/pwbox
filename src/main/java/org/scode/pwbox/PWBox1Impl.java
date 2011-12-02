@@ -15,7 +15,7 @@ import java.util.Arrays;
  *
  * The format of encrypted data is as follows:
  *
- * <code>
+ * <pre>
  *     Byte 00:      'P' ASCII code
  *     Byte 01:      'W" ASCII code
  *     Byte 02:      'B' ASCII code
@@ -32,7 +32,7 @@ import java.util.Arrays;
  *     Byte 202-209: 8 bytes in DataOutputStream.writeLong() format of length of the remainder (for
  *                   truncation detection for user-friendly errors, not HMAC:ed).
  *     Byte 210-EOF: Encrypted text (AES/CBC/PKCS5PADDING)
- * </code>
+ * </pre>
  *
  */
 public class PWBox1Impl {

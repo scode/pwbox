@@ -1,5 +1,10 @@
 package org.scode.pwbox;
 
+/**
+ * Indicates PWBox was passed encrypted data that does not seem to be in PWBox format.
+ *
+ * Note that malicious tampering or random corruption can trigger this exception.
+ */
 public class InvalidMagicException extends PWBoxException {
     public InvalidMagicException() {
     }

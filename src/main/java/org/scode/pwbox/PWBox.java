@@ -1,6 +1,25 @@
 package org.scode.pwbox;
 
+/** A simple high-level passphrase based encryption and authentication library.
+ *
+ * Exactly two features are provided; encryption and decryption. For detailed usage, see each individual method.
+ * For an overall documentation of the project, including information about the encryption and integrity
+ * checking, see the README.
+ *
+ * Here is a simple example (minus exception handling):
+ *
+ * <pre>
+ *     byte[] encrypted = PWBox.encrypt(PWBox.Format.DEFAULT, "passphrase", "secret".getBytes("UTF-8"));
+ *     byte[] plain = PWBox.decrypt("passphrase", encrypted);
+ * </pre>
+ *
+ * @see org.scode.pwbox.PWBoxException
+ * @see org.scode.pwbox.PWBoxError
+ */
 public class PWBox {
+    /**
+     * The format of an encrypted PWBox byte array.
+     */
     public static enum Format {
         /** Default (implementation defined) format. */
         DEFAULT,

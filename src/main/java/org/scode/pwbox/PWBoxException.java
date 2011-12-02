@@ -1,5 +1,9 @@
 package org.scode.pwbox;
 
+/**
+ * Common base class for all exceptions that indicate a problem that is not an internal bug; thus, they are
+ * checked.
+ */
 public class PWBoxException extends Exception {
     public PWBoxException() {
     }
