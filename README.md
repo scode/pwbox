@@ -21,10 +21,6 @@ I am currently looking for feedback on whether or not the format and
 implementation is cryptographically sound (see PWBox.java - the only
 relelvant part).
 
-## TODO
-
-* Fix error propagation; don't result in PWBoxError when PWBoxException is appropriate (structural changes only).
-
 ## Requested feedback points
 
 See PWBox.java.
