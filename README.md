@@ -14,8 +14,11 @@ single thing: password protected cryptographically sound storage of
 small amounts of data (suitable for keychains and similar
 use-cases). Code required to encrypt:
 
-    PWBox box = new PWBox();
-    byte[] data = box.encrypt("passphrase", "super secret data".getBytes("UTF-8"))
+    byte[] encrypted = box.encrypt(PWBox.Format.DEFAULT, "passphrase", "super secret data".getBytes("UTF-8"))
+
+Core required to decrypt:
+
+    byte[] plain = box.decrypt("passphrase", encrypted);
 
 I am currently looking for feedback on whether or not the format and
 implementation is cryptographically sound (see PWBox.java - the only
