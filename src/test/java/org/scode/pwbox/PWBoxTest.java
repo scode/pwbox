@@ -11,6 +11,6 @@ public class PWBoxTest {
         byte[] encrypted = PWBox.encrypt(PWBox.Format.DEFAULT, "passphrase", "secret".getBytes("UTF-8"));
         byte[] plain = PWBox.decrypt("passphrase", encrypted);
 
-        Assert.assertEquals(plain, "secret");
+        Assert.assertEquals(plain, "secret".getBytes("UTF-8"));
     }
 }
