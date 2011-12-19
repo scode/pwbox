@@ -38,5 +38,7 @@ See PWBox.java.
 ** The reason to consider this is to be more resilient against poor IV entropy.
 * Consider HMAC:ing plaintext instead of iv+salt+crypted.
 ** Here is a good reason why not to do that: http://blog.thoughtcrime.org/the-cryptographic-doom-principle
+** That seems to apply to the "bad passphrase detection" algorithm too. However, since we are using a different IV for that, and the plaintext is by definition already known, it would seem harmless.
+
 
 
