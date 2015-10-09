@@ -40,19 +40,19 @@ public class PWBox1Impl {
      * I chose salt length to be equal to key length on the hypothesis that a salt length larger than the key size
      * is useless, and I know of no reason to prefer a smaller one.
      */
-    static final int SALT_LENGTH_IN_BYTES = 32;
+    private static final int SALT_LENGTH_IN_BYTES = 32;
 
     /**
      * The IV length must be 16 bytes long according to an InvalidAlgorithmParameterException which is otherwise
      * thrown by the AESCipher (tested on JDK 1.6 on MacOS). I am unfamiliar with the implications cryptographically.
      */
-    static final int IV_LENGTH_IN_BYTES = 16;
+    private static final int IV_LENGTH_IN_BYTES = 16;
 
     /**
      * The assumption of PWBox is that small amounts of data are being encrypted and decrypted, meaning that
      * the performance penalty of a larger key is irrelevant. So, go with 256 bits (instead of 128).
      */
-    static final int KEY_LENGTH_IN_BITS = 256;
+    private static final int KEY_LENGTH_IN_BITS = 256;
 
     /**
      * Key stretching iteration count. The higher the more resilience you get against bruce force attacks against
@@ -60,25 +60,25 @@ public class PWBox1Impl {
      * tests still run reasonably fast, so it's okay for the end-user that only needs to wait for a handful of
      * key generations".
      */
-    static final int PBE_ITERATION_COUNT = 10000;
+    private static final int PBE_ITERATION_COUNT = 10000;
 
     /**
      * The known plaintext which is used to give a friendlier indication that the wrong passphrase was probably
      * used.
      */
-    static final String CORRECT_PASSPHRASE_MARKER = "it appears that the passphrase is correct";
+    private static final String CORRECT_PASSPHRASE_MARKER = "it appears that the passphrase is correct";
 
     /**
      * The length of CORRECT_PASSPHRASE_MARKER when encrypted with our choice of keys and algorithms. Empirically
      * observed and hard-coded.
      */
-    static final int CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH = 48;
+    private static final int CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH = 48;
 
     /**
      * AES was chosen since it seems to be the currently preferred default choice. As a non-cryptographer, I see
      * no reason to choose something else without a specific reason to.
      */
-    static final String ENCRYPTION_ALGORITHM = "AES";
+    private static final String ENCRYPTION_ALGORITHM = "AES";
 
     /**
      * CBC and CTR seem to be commonly preferred modes, and I did not want to diverge from commonly accepted
@@ -86,26 +86,26 @@ public class PWBox1Impl {
      * premise of this library is that small amounts of data are dealt with we do not care about that. Feedback
      * I got indicated that CBC would degrade better in case of a low-entropy IV, so I stayed with that.
      */
-    static final String CIPHER_SPEC = "AES/CBC/PKCS5PADDING";
+    private static final String CIPHER_SPEC = "AES/CBC/PKCS5PADDING";
 
     /**
      * See http://en.wikipedia.org/wiki/PBKDF2 about PBKDF2. bcrypt and scrypt are supposed to be better, but I
      * went with PBKDF2 because it's very established and because it's available by default in the JDK. Availability
      * in the JDK goes for SHA1 too.
      */
-    static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
+    private static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
 
     /**
      * SHA1 due to availability of HmacSHA1 in JDK.
      */
-    static final String HMAC_ALGORITHM = "HmacSHA1";
+    private static final String HMAC_ALGORITHM = "HmacSHA1";
 
-    Key generateKey(String passphrase, byte[] salt) {
-        SecretKeyFactory f = null;
+    private Key generateKey(String passphrase, byte[] salt) {
+        final SecretKeyFactory f;
         try {
             f = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY_ALGORITHM);
-            KeySpec ks = new PBEKeySpec(passphrase.toCharArray(), salt, PBE_ITERATION_COUNT, KEY_LENGTH_IN_BITS);
-            SecretKey s = f.generateSecret(ks);
+            final KeySpec ks = new PBEKeySpec(passphrase.toCharArray(), salt, PBE_ITERATION_COUNT, KEY_LENGTH_IN_BITS);
+            final SecretKey s = f.generateSecret(ks);
             return new SecretKeySpec(s.getEncoded(), ENCRYPTION_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             throw new PWBoxError(e);
@@ -114,26 +114,26 @@ public class PWBox1Impl {
         }
     }
 
-    byte[] generateSalt() {
-        SecureRandom sr = new SecureRandom();
+    private byte[] generateSalt() {
+        final SecureRandom sr = new SecureRandom();
 
-        byte[] salt = new byte[SALT_LENGTH_IN_BYTES];
+        final byte[] salt = new byte[SALT_LENGTH_IN_BYTES];
         sr.nextBytes(salt);
 
         return salt;
     }
 
-    byte[] generateIv() {
-        SecureRandom sr = new SecureRandom();
+    private byte[] generateIv() {
+        final SecureRandom sr = new SecureRandom();
 
-        byte[] iv = new byte[IV_LENGTH_IN_BYTES];
+        final byte[] iv = new byte[IV_LENGTH_IN_BYTES];
         sr.nextBytes(iv);
 
         return iv;
     }
 
-    byte[] encrypt(Key k, byte[] iv, byte[] plainText) {
-        Cipher c = null;
+    private byte[] encrypt(Key k, byte[] iv, byte[] plainText) {
+        final Cipher c;
         try {
             c = Cipher.getInstance(CIPHER_SPEC);
             c.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(iv));
@@ -153,9 +153,9 @@ public class PWBox1Impl {
         }
     }
 
-    byte[] decrypt(Key k, byte[] iv, byte[] encryptedText) {
+    private byte[] decrypt(Key k, byte[] iv, byte[] encryptedText) {
         try {
-            Cipher c = Cipher.getInstance(CIPHER_SPEC);
+            final Cipher c = Cipher.getInstance(CIPHER_SPEC);
             c.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
             return c.doFinal(encryptedText);
         } catch (IllegalBlockSizeException e) {
@@ -173,9 +173,9 @@ public class PWBox1Impl {
         }
     }
 
-    byte[] hmac(Key k, byte[] text) {
+    private byte[] hmac(Key k, byte[] text) {
         try {
-            Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+            final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
             mac.init(k);
             return mac.doFinal(text);
         } catch (NoSuchAlgorithmException e) {
@@ -187,35 +187,35 @@ public class PWBox1Impl {
 
     public byte[] encrypt(String passphrase, byte[] plaintext) throws PWBoxException, PWBoxError {
         try {
-            byte[] magic = "PWBox".getBytes("ASCII");
+            final byte[] magic = "PWBox".getBytes("ASCII");
 
-            byte[] version = new byte[1];
+            final byte[] version = new byte[1];
             version[0] = 1;
 
-            byte[] pphraseIv = this.generateIv();
-            byte[] encIv = this.generateIv();
-            byte[] pphraseSalt = this.generateSalt();
-            byte[] encSalt = this.generateSalt();
-            byte[] macSalt = this.generateSalt();
+            final byte[] pphraseIv = this.generateIv();
+            final byte[] encIv = this.generateIv();
+            final byte[] pphraseSalt = this.generateSalt();
+            final byte[] encSalt = this.generateSalt();
+            final byte[] macSalt = this.generateSalt();
 
-            Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
-            Key encKey = this.generateKey(passphrase, encSalt);
-            Key macKey = this.generateKey(passphrase, macSalt);
+            final Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
+            final Key encKey = this.generateKey(passphrase, encSalt);
+            final Key macKey = this.generateKey(passphrase, macSalt);
 
-            byte[] pphraseText = this.encrypt(pphraseKey, pphraseIv, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"));
+            final byte[] pphraseText = this.encrypt(pphraseKey, pphraseIv, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"));
             if (pphraseText.length != CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH) {
                 throw new PWBoxError("bug: encrypted correct passphrase marker not of expected length");
             }
-            byte[] encText = this.encrypt(encKey, encIv, plaintext);
+            final byte[] encText = this.encrypt(encKey, encIv, plaintext);
 
-            ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
+            final ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
             hmaced.write(encIv);
             hmaced.write(encSalt);
             hmaced.write(encText);
-            byte[] hmac = this.hmac(macKey, hmaced.toByteArray());
+            final byte[] hmac = this.hmac(macKey, hmaced.toByteArray());
 
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            DataOutputStream dout = new DataOutputStream(bout);
+            final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            final DataOutputStream dout = new DataOutputStream(bout);
             dout.write(magic);
             dout.write(version);
             dout.write(pphraseIv);
@@ -228,10 +228,10 @@ public class PWBox1Impl {
             dout.writeLong(encText.length);
             dout.write(encText);
 
-            byte[] encrypted = bout.toByteArray();
+            final byte[] encrypted = bout.toByteArray();
 
             // For pure paranoia. We are not concerned with performance given our premises.
-            byte[] decrypted = this.decrypt(passphrase, encrypted);
+            final byte[] decrypted = this.decrypt(passphrase, encrypted);
             if (!Arrays.equals(decrypted, plaintext)) {
                 System.out.format("%h != %h", decrypted, plaintext);
                 throw new PWBoxError("bug: decrypting what we just encrypted did not yield matching plaintext");
@@ -247,11 +247,11 @@ public class PWBox1Impl {
 
     public byte[] decrypt(String passphrase, byte[] encryptedContent) throws PWBoxException, PWBoxError {
         try {
-            DataInputStream din = new DataInputStream(new ByteArrayInputStream(encryptedContent));
+            final DataInputStream din = new DataInputStream(new ByteArrayInputStream(encryptedContent));
 
-            byte[] magic = "PWBox".getBytes("ASCII");
+            final byte[] magic = "PWBox".getBytes("ASCII");
             try {
-                byte[] rmagic = new byte[magic.length];
+                final byte[] rmagic = new byte[magic.length];
                 din.readFully(rmagic);
                 if (!Arrays.equals(magic, rmagic)) {
                     throw new InvalidMagicException("invalid magic - not PWBox data?");
@@ -260,7 +260,7 @@ public class PWBox1Impl {
                 throw new InvalidMagicException("input data did not contain magic indicating it is PWBox data - too short");
             }
 
-            byte[] rversion = new byte[1];
+            final byte[] rversion = new byte[1];
             try {
                 din.readFully(rversion);
                 if (rversion[0] != 1) {
@@ -270,13 +270,13 @@ public class PWBox1Impl {
                 throw new TruncatedException("truncated before format version could be read");
             }
 
-            byte[] pphraseIv = new byte[16];
-            byte[] encIv = new byte[16];
-            byte[] pphraseSalt = new byte[32];
-            byte[] encSalt = new byte[32];
-            byte[] macSalt = new byte[32];
-            byte[] hmac = new byte[20];
-            byte[] encPphraseMarker = new byte[CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH];
+            final byte[] pphraseIv = new byte[16];
+            final byte[] encIv = new byte[16];
+            final byte[] pphraseSalt = new byte[32];
+            final byte[] encSalt = new byte[32];
+            final byte[] macSalt = new byte[32];
+            final byte[] hmac = new byte[20];
+            final byte[] encPphraseMarker = new byte[CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH];
 
             try {
                 din.readFully(pphraseIv);
@@ -335,7 +335,7 @@ public class PWBox1Impl {
                 throw new UnsupportedDataLengthException("length < 0");
             }
 
-            byte[] encrypted = new byte[(int)len];
+            final byte[] encrypted = new byte[(int)len];
             try {
                 din.readFully(encrypted);
             } catch (EOFException e) {
@@ -346,12 +346,12 @@ public class PWBox1Impl {
                 throw new TrailingGarbageException("expected EOF after reading " + len + " bytes of encrypted text (after header)");
             }
 
-            Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
-            Key encKey = this.generateKey(passphrase, encSalt);
-            Key macKey = this.generateKey(passphrase, macSalt);
+            final Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
+            final Key encKey = this.generateKey(passphrase, encSalt);
+            final Key macKey = this.generateKey(passphrase, macSalt);
 
             try {
-                byte[] readPphraseMarker = this.decrypt(pphraseKey, pphraseIv, encPphraseMarker);
+                final byte[] readPphraseMarker = this.decrypt(pphraseKey, pphraseIv, encPphraseMarker);
                 if (!Arrays.equals(readPphraseMarker, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"))) {
                     throw new ProbablyBadPassphraseException();
                 }
@@ -364,11 +364,11 @@ public class PWBox1Impl {
                 throw new ProbablyBadPassphraseException();
             }
 
-            ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
+            final ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
             hmaced.write(encIv);
             hmaced.write(encSalt);
             hmaced.write(encrypted);
-            byte[] expectedHmac = this.hmac(macKey, hmaced.toByteArray());
+            final byte[] expectedHmac = this.hmac(macKey, hmaced.toByteArray());
             if (!Arrays.equals(expectedHmac, hmac)) {
                 throw new InvalidHmacException("hmac did not match expectation - has data been tampered with? wrong passphrase?");
             }

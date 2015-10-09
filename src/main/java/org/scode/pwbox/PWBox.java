@@ -20,7 +20,7 @@ public class PWBox {
     /**
      * The format of an encrypted PWBox byte array.
      */
-    public static enum Format {
+    public enum Format {
         /** Default (implementation defined) format. */
         DEFAULT,
         /** The first version of the format. */
