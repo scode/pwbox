@@ -36,11 +36,12 @@ import java.util.Arrays;
  *
  */
 public class PWBox1Impl {
-    /**
+    /** Visible for testing.
+     *
      * I chose salt length to be equal to key length on the hypothesis that a salt length larger than the key size
      * is useless, and I know of no reason to prefer a smaller one.
      */
-    private static final int SALT_LENGTH_IN_BYTES = 32;
+    static final int SALT_LENGTH_IN_BYTES = 32;
 
     /**
      * The IV length must be 16 bytes long according to an InvalidAlgorithmParameterException which is otherwise
@@ -100,7 +101,8 @@ public class PWBox1Impl {
      */
     private static final String HMAC_ALGORITHM = "HmacSHA1";
 
-    private Key generateKey(String passphrase, byte[] salt) {
+    /** Visible for testing. */
+    Key generateKey(String passphrase, byte[] salt) {
         final SecretKeyFactory f;
         try {
             f = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY_ALGORITHM);
@@ -114,7 +116,8 @@ public class PWBox1Impl {
         }
     }
 
-    private byte[] generateSalt() {
+    /** Visible for testing. */
+    byte[] generateSalt() {
         final SecureRandom sr = new SecureRandom();
 
         final byte[] salt = new byte[SALT_LENGTH_IN_BYTES];
@@ -123,7 +126,8 @@ public class PWBox1Impl {
         return salt;
     }
 
-    private byte[] generateIv() {
+    /** Visible for testing. */
+    byte[] generateIv() {
         final SecureRandom sr = new SecureRandom();
 
         final byte[] iv = new byte[IV_LENGTH_IN_BYTES];
@@ -132,7 +136,8 @@ public class PWBox1Impl {
         return iv;
     }
 
-    private byte[] encrypt(Key k, byte[] iv, byte[] plainText) {
+    /** Visible for testing. */
+    byte[] encrypt(Key k, byte[] iv, byte[] plainText) {
         final Cipher c;
         try {
             c = Cipher.getInstance(CIPHER_SPEC);
@@ -153,7 +158,8 @@ public class PWBox1Impl {
         }
     }
 
-    private byte[] decrypt(Key k, byte[] iv, byte[] encryptedText) {
+    /** Visible for testing. */
+    byte[] decrypt(Key k, byte[] iv, byte[] encryptedText) {
         try {
             final Cipher c = Cipher.getInstance(CIPHER_SPEC);
             c.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
@@ -173,7 +179,8 @@ public class PWBox1Impl {
         }
     }
 
-    private byte[] hmac(Key k, byte[] text) {
+    /** Visible for testing */
+    byte[] hmac(Key k, byte[] text) {
         try {
             final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
             mac.init(k);
