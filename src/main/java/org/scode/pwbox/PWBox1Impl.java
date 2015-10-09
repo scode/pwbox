@@ -11,7 +11,21 @@ import java.security.spec.KeySpec;
 import java.util.Arrays;
 
 /**
- * Data format:
+ * Passphrase marker
+ * =================
+ *
+ * In order to be user friendly, we wish to differentiate decryption failures resulting from an incorrect
+ * passphrase from other decryption failures.
+ *
+ * The strategy implement here is to encrypt a static known string - the "passphrase marker".
+ *
+ * If we can successfully decrypt said marker and the plain text matches, we presume that the chosen passphrase
+ * is correct and proceed to attempt decryption of the user provided text.
+ *
+ * The passphrase marker is encrypted using a different IV than the user provided text.
+ *
+ * Wire format
+ * ===========
  *
  * The format of encrypted data is as follows:
  *
@@ -21,11 +35,11 @@ import java.util.Arrays;
  *     Byte 02:      'B' ASCII code
  *     Byte 03:      'o' ASCII code
  *     Byte 04:      'x' ASCII code
- *     Byte 05:      0, indicating the zeroth version of the PWBox format
+ *     Byte 05:      1, indicating the first version of the PWBox format
  *     Byte 06-21:   16 byte IV used for encrypting the passphrase marker
- *     Byte 22-37:   16 byte IV used for encryption
- *     Byte 38-69:   32 byte salt used for encrypting the passphrase marker
- *     Byte 70-101:  32 byte salt used for encryption key
+ *     Byte 22-37:   16 byte IV used for encrypting user provided text
+ *     Byte 38-69:   32 byte salt used to generate the key used to encrypt the passphrase marker
+ *     Byte 70-101:  32 byte salt used to generate the key used to encrypt the user provided text
  *     Byte 102-133: 32 byte salt used for HMAC key
  *     Byte 134-153: 20 bytes HMAC (SHA1) over iv + encryption key + encrypted text
  *     Byte 154-201: 48 byte encrypted passphrase marker
@@ -52,8 +66,11 @@ public class PWBox1Impl {
     /**
      * The assumption of PWBox is that small amounts of data are being encrypted and decrypted, meaning that
      * the performance penalty of a larger key is irrelevant. So, go with 256 bits (instead of 128).
+     *
+     * TODO(scode): Temporarily set to 128 because 256 generates "illegal key size" on my system, possibly
+     *              due to http://stackoverflow.com/questions/3862800/invalidkeyexception-illegal-key-size
      */
-    private static final int KEY_LENGTH_IN_BITS = 256;
+    private static final int KEY_LENGTH_IN_BITS = 128;
 
     /**
      * Key stretching iteration count. The higher the more resilience you get against bruce force attacks against
@@ -194,46 +211,49 @@ public class PWBox1Impl {
 
     public byte[] encrypt(String passphrase, byte[] plaintext) throws PWBoxException, PWBoxError {
         try {
+            // Prepare byte arrays of content in the same order as documented in the class docs, and
+            // in the same order as the resulting bytes.
             final byte[] magic = "PWBox".getBytes("ASCII");
 
             final byte[] version = new byte[1];
             version[0] = 1;
 
-            final byte[] pphraseIv = this.generateIv();
-            final byte[] encIv = this.generateIv();
-            final byte[] pphraseSalt = this.generateSalt();
-            final byte[] encSalt = this.generateSalt();
-            final byte[] macSalt = this.generateSalt();
+            final byte[] markerIv = this.generateIv();
+            final byte[] userEncIv = this.generateIv();
+            final byte[] markerKeySalt = this.generateSalt();
+            final byte[] userKeySalt = this.generateSalt();
+            final byte[] hmacSalt = this.generateSalt();
 
-            final Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
-            final Key encKey = this.generateKey(passphrase, encSalt);
-            final Key macKey = this.generateKey(passphrase, macSalt);
+            final Key markerKey = this.generateKey(passphrase, markerKeySalt);
+            final Key userEncKey = this.generateKey(passphrase, userKeySalt);
+            final Key hmacKey = this.generateKey(passphrase, hmacSalt);
 
-            final byte[] pphraseText = this.encrypt(pphraseKey, pphraseIv, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"));
-            if (pphraseText.length != CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH) {
+            final byte[] encMarkerText = this.encrypt(markerKey, markerIv, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"));
+            if (encMarkerText.length != CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH) {
                 throw new PWBoxError("bug: encrypted correct passphrase marker not of expected length");
             }
-            final byte[] encText = this.encrypt(encKey, encIv, plaintext);
 
-            final ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
-            hmaced.write(encIv);
-            hmaced.write(encSalt);
-            hmaced.write(encText);
-            final byte[] hmac = this.hmac(macKey, hmaced.toByteArray());
+            final byte[] encUserText = this.encrypt(userEncKey, userEncIv, plaintext);
+
+            final ByteArrayOutputStream hmacOutputStream = new ByteArrayOutputStream();
+            hmacOutputStream.write(userEncIv);
+            hmacOutputStream.write(userKeySalt);
+            hmacOutputStream.write(encUserText);
+            final byte[] hmac = this.hmac(hmacKey, hmacOutputStream.toByteArray());
 
             final ByteArrayOutputStream bout = new ByteArrayOutputStream();
             final DataOutputStream dout = new DataOutputStream(bout);
             dout.write(magic);
             dout.write(version);
-            dout.write(pphraseIv);
-            dout.write(encIv);
-            dout.write(pphraseSalt);
-            dout.write(encSalt);
-            dout.write(macSalt);
+            dout.write(markerIv);
+            dout.write(userEncIv);
+            dout.write(markerKeySalt);
+            dout.write(userKeySalt);
+            dout.write(hmacSalt);
             dout.write(hmac);
-            dout.write(pphraseText);
-            dout.writeLong(encText.length);
-            dout.write(encText);
+            dout.write(encMarkerText);
+            dout.writeLong(encUserText.length);
+            dout.write(encUserText);
 
             final byte[] encrypted = bout.toByteArray();
 
@@ -277,40 +297,40 @@ public class PWBox1Impl {
                 throw new TruncatedException("truncated before format version could be read");
             }
 
-            final byte[] pphraseIv = new byte[16];
-            final byte[] encIv = new byte[16];
-            final byte[] pphraseSalt = new byte[32];
-            final byte[] encSalt = new byte[32];
-            final byte[] macSalt = new byte[32];
+            final byte[] markerIv = new byte[16];
+            final byte[] userEncIv = new byte[16];
+            final byte[] markerKeySalt = new byte[32];
+            final byte[] userKeySalt = new byte[32];
+            final byte[] hmacSalt = new byte[32];
             final byte[] hmac = new byte[20];
             final byte[] encPphraseMarker = new byte[CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH];
 
             try {
-                din.readFully(pphraseIv);
+                din.readFully(markerIv);
             } catch (EOFException e) {
                 throw new TruncatedException("data truncated reading pphrase marker iv");
             }
 
             try {
-                din.readFully(encIv);
+                din.readFully(userEncIv);
             } catch (EOFException e) {
                 throw new TruncatedException("data truncated reading encryption iv");
             }
 
             try {
-                din.readFully(pphraseSalt);
+                din.readFully(markerKeySalt);
             } catch (EOFException e) {
                 throw new TruncatedException("data truncated reading pphrase marker salt");
             }
 
             try {
-                din.readFully(encSalt);
+                din.readFully(userKeySalt);
             } catch (EOFException e) {
                 throw new TruncatedException("data truncated reading encryption salt");
             }
 
             try {
-                din.readFully(macSalt);
+                din.readFully(hmacSalt);
             } catch (EOFException e) {
                 throw new TruncatedException("data truncated reading hmac salt");
             }
@@ -342,9 +362,9 @@ public class PWBox1Impl {
                 throw new UnsupportedDataLengthException("length < 0");
             }
 
-            final byte[] encrypted = new byte[(int)len];
+            final byte[] encUserText = new byte[(int)len];
             try {
-                din.readFully(encrypted);
+                din.readFully(encUserText);
             } catch (EOFException e) {
                 throw new TruncatedException("data truncated reading encrypted text (expected " + len + " bytes after header)");
             }
@@ -353,13 +373,13 @@ public class PWBox1Impl {
                 throw new TrailingGarbageException("expected EOF after reading " + len + " bytes of encrypted text (after header)");
             }
 
-            final Key pphraseKey = this.generateKey(passphrase, pphraseSalt);
-            final Key encKey = this.generateKey(passphrase, encSalt);
-            final Key macKey = this.generateKey(passphrase, macSalt);
+            final Key markerKey = this.generateKey(passphrase, markerKeySalt);
+            final Key userKey = this.generateKey(passphrase, userKeySalt);
+            final Key hmacKey = this.generateKey(passphrase, hmacSalt);
 
             try {
-                final byte[] readPphraseMarker = this.decrypt(pphraseKey, pphraseIv, encPphraseMarker);
-                if (!Arrays.equals(readPphraseMarker, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"))) {
+                final byte[] plainMarker = this.decrypt(markerKey, markerIv, encPphraseMarker);
+                if (!Arrays.equals(plainMarker, CORRECT_PASSPHRASE_MARKER.getBytes("UTF-8"))) {
                     throw new ProbablyBadPassphraseException();
                 }
             } catch (PWBoxError e) {
@@ -372,15 +392,15 @@ public class PWBox1Impl {
             }
 
             final ByteArrayOutputStream hmaced = new ByteArrayOutputStream();
-            hmaced.write(encIv);
-            hmaced.write(encSalt);
-            hmaced.write(encrypted);
-            final byte[] expectedHmac = this.hmac(macKey, hmaced.toByteArray());
+            hmaced.write(userEncIv);
+            hmaced.write(userKeySalt);
+            hmaced.write(encUserText);
+            final byte[] expectedHmac = this.hmac(hmacKey, hmaced.toByteArray());
             if (!Arrays.equals(expectedHmac, hmac)) {
                 throw new InvalidHmacException("hmac did not match expectation - has data been tampered with? wrong passphrase?");
             }
 
-            return this.decrypt(encKey, encIv, encrypted);
+            return this.decrypt(userKey, userEncIv, encUserText);
         } catch (UnsupportedEncodingException e) {
             throw new PWBoxError(e);
         } catch (IOException e) {

@@ -137,7 +137,7 @@ public class PWBox1ImplTest {
 
         // Detect whether the implementation changes its output in any way. Flip to true to generate
         // the original hex which appears inline in the second arm of the if.
-        if (false) {
+        if (true) { // TODO(scode): See KEY_LENGTH_IN_BITS
             final byte[] encrypted = box.encrypt(passphrase, plaintext);
             final StringBuffer hex = new StringBuffer();
             for (byte b : encrypted) {
