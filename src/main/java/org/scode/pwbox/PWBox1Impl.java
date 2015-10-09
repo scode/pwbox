@@ -11,6 +11,19 @@ import java.security.spec.KeySpec;
 import java.util.Arrays;
 
 /**
+ * Introduction
+ * ============
+ *
+ * We try to do one thing, and make it simple: Take a reasonably small (fits in memory, quick to encrypt/decrypt)
+ * amount of data, and allow encryption and decryption based on the use of a passphrase. The target usage is
+ * that of password vaults and similar smaller pieces of meta data that is sometimes useful and typically painful
+ * unless you're a crypto guy.
+ *
+ * We do *not* attempt to protect against local attacks. For example, there is no memory locking to prevent
+ * a passphrase from ending up in swap; the JVM might core dump and include a passphrase in the resulting
+ * dump, etc. The purpose here is only to provide a mechanism to produce a tamper resistant encrypted blob of data
+ * that can be transferred elsewhere, such as remote untrusted storage for backups.
+ *
  * Passphrase marker
  * =================
  *
@@ -23,6 +36,14 @@ import java.util.Arrays;
  * is correct and proceed to attempt decryption of the user provided text.
  *
  * The passphrase marker is encrypted using a different IV than the user provided text.
+ *
+ * Truncation detection
+ * ====================
+ *
+ * As is apparent in the wire format section, we have some bits reserved for truncation detection. This information
+ * is not HMAC:ed, and not "trusted". It is merely there to assist the user in the somewhat likely cause of a file
+ * containing a PW box being truncated. Rather than just reporting some kind of corruption, we intend on nicely telling
+ * the user that it is likely "just" truncated'.
  *
  * Wire format
  * ===========
