@@ -34,11 +34,8 @@ See PWBox.java.
 
 * (rejected; updated feedback is that CBC degrades better) Maybe use other than CBC (CTR?) to decrease reliance on IV entropy
 * And/or maybe use key stretching for the IV
-** Out of princple, not being a cryptographer, I do not want to implement key stretching myself even if it "seems" simple. Key stretching an arbitrary byte[] doesn't seem exposed by the Java API.
-** The reason to consider this is to be more resilient against poor IV entropy.
+ * Out of princple, not being a cryptographer, I do not want to implement key stretching myself even if it "seems" simple. Key stretching an arbitrary byte[] doesn't seem exposed by the Java API.
+ * The reason to consider this is to be more resilient against poor IV entropy.
 * Consider HMAC:ing plaintext instead of iv+salt+crypted.
-** Here is a good reason why not to do that: http://blog.thoughtcrime.org/the-cryptographic-doom-principle
-** That seems to apply to the "bad passphrase detection" algorithm too. However, since we are using a different IV for that, and the plaintext is by definition already known, it would seem harmless.
-
-
-
+ * Here is a good reason why not to do that: http://blog.thoughtcrime.org/the-cryptographic-doom-principle
+ * That seems to apply to the "bad passphrase detection" algorithm too. However, since we are using a different IV for that, and the plaintext is by definition already known, it would seem harmless.
