@@ -281,7 +281,6 @@ public class PWBox1Impl {
             // For pure paranoia. We are not concerned with performance given our premises.
             final byte[] decrypted = this.decrypt(passphrase, encrypted);
             if (!Arrays.equals(decrypted, plaintext)) {
-                System.out.format("%h != %h", decrypted, plaintext);
                 throw new PWBoxError("bug: decrypting what we just encrypted did not yield matching plaintext");
             }
 
