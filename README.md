@@ -7,6 +7,8 @@ to review the crypto stuff.
 Reviewers: See PWBox.java; it has a description of the format and the
 tiny implementation.
 
+[![Travis Build Status](https://travis-ci.org/scode/pwbox.svg?branch=master)](https://travis-ci.org/scode/pwbox)
+
 ## What is it?
 
 An easy-to-use high-level abstraction (for the JVM) to accomplish a
