@@ -1,4 +1,4 @@
-package org.scode.pwbox;
+package org.scode.pwbox.errors;
 
 /**
  * Indicates PWBox was successfully able to interpret an encrypted text, but there was left-over trailing

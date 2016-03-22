@@ -1,4 +1,4 @@
-package org.scode.pwbox;
+package org.scode.pwbox.errors;
 
 /**
  * Indicates PWBox was passed data which may (but need not) be correctly formatted, but the length of the

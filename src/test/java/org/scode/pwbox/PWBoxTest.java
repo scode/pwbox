@@ -1,5 +1,6 @@
 package org.scode.pwbox;
 
+import org.scode.pwbox.errors.PWBoxException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

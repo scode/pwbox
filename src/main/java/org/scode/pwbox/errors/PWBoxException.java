@@ -1,4 +1,4 @@
-package org.scode.pwbox;
+package org.scode.pwbox.errors;
 
 /**
  * Common base class for all exceptions that indicate a problem that is not an internal bug; thus, they are

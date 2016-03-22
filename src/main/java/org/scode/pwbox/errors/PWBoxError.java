@@ -1,4 +1,4 @@
-package org.scode.pwbox;
+package org.scode.pwbox.errors;
 
 /**
  * Common base class for PWBox specific errors that indicate an internal bug in PWBox or a dependent library.

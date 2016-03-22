@@ -1,5 +1,8 @@
 package org.scode.pwbox;
 
+import org.scode.pwbox.errors.PWBoxError;
+import org.scode.pwbox.errors.PWBoxException;
+import org.scode.pwbox.errors.ProbablyBadPassphraseException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

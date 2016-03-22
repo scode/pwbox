@@ -1,4 +1,4 @@
-package org.scode.pwbox;
+package org.scode.pwbox.errors;
 
 /**
  * Indicates the encrypted text given to PWBox for decryption was truncated (i.e., there was missing data

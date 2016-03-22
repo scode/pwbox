@@ -1,4 +1,4 @@
-package org.scode.pwbox;
+package org.scode.pwbox.errors;
 
 /**
  * Indicates that PWBox was passed data which did not pass cryptographic integrity checking.

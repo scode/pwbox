@@ -1,5 +1,8 @@
 package org.scode.pwbox;
 
+import org.scode.pwbox.errors.PWBoxError;
+import org.scode.pwbox.errors.PWBoxException;
+
 /** A simple high-level passphrase based encryption and authentication library.
  *
  * Exactly two features are provided; encryption and decryption. For detailed usage, see each individual method.
@@ -13,8 +16,8 @@ package org.scode.pwbox;
  *     byte[] plain = PWBox.decrypt("passphrase", encrypted);
  * </pre>
  *
- * @see org.scode.pwbox.PWBoxException
- * @see org.scode.pwbox.PWBoxError
+ * @see PWBoxException
+ * @see PWBoxError
  */
 public class PWBox {
     /**

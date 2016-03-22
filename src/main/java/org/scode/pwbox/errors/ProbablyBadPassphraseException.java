@@ -1,4 +1,6 @@
-package org.scode.pwbox;
+package org.scode.pwbox.errors;
+
+import org.scode.pwbox.errors.PWBoxException;
 
 /**
  * Thrown to indicate a decryption attempt failed, and the reason is probably that an incorrect passphrase

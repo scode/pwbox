@@ -1,5 +1,7 @@
 package org.scode.pwbox;
 
+import org.scode.pwbox.errors.*;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
