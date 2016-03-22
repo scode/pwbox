@@ -25,6 +25,10 @@ I am currently looking for feedback on whether or not the format and
 implementation is cryptographically sound (see PWBox.java - the only
 relelvant part).
 
+## Generate a code coverage report for unit tests
+
+    gradle test && gradle jacocoTestReport
+
 ## Requested feedback points
 
 See PWBox.java.
