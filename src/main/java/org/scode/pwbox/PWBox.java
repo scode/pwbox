@@ -9,7 +9,7 @@ package org.scode.pwbox;
  * Here is a simple example (minus exception handling):
  *
  * <pre>
- *     byte[] encrypted = PWBox.encrypt(PWBox.Format.DEFAULT, "passphrase", "secret".getBytes("UTF-8"));
+ *     byte[] encrypted = PWBox.encrypt(PWBox.Version.LATEST, "passphrase", "secret".getBytes("UTF-8"));
  *     byte[] plain = PWBox.decrypt("passphrase", encrypted);
  * </pre>
  *
@@ -18,22 +18,22 @@ package org.scode.pwbox;
  */
 public class PWBox {
     /**
-     * The format of an encrypted PWBox byte array.
+     * The version (on-disk wire format) of an encrypted PWBox byte array.
      */
-    public enum Format {
+    public enum Version {
         /** Default (implementation defined) format. */
-        DEFAULT,
+        LATEST,
         /** The first version of the format. */
         ONE,
     }
 
-    public static byte[] encrypt(Format format, String passphrase, byte[] plainTextContent) throws PWBoxException, PWBoxError {
-        switch (format) {
-            case DEFAULT:
+    public static byte[] encrypt(Version version, String passphrase, byte[] plainTextContent) throws PWBoxException, PWBoxError {
+        switch (version) {
+            case LATEST:
             case ONE:
                 return new PWBox1Impl().encrypt(passphrase, plainTextContent);
             default:
-                throw new AssertionError("invalid format requested");
+                throw new AssertionError("invalid version requested: " + version);
         }
     }
 

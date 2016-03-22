@@ -6,19 +6,19 @@ package org.scode.pwbox;
  *
  * Note that malicious tampering or arbitrary corruption can trigger this exception.
  */
-public class UnsupportedFormatVersionException extends PWBoxException {
-    public UnsupportedFormatVersionException() {
+public class UnsupportedVersionException extends PWBoxException {
+    public UnsupportedVersionException() {
     }
 
-    public UnsupportedFormatVersionException(String s) {
+    public UnsupportedVersionException(String s) {
         super(s);
     }
 
-    public UnsupportedFormatVersionException(String s, Throwable throwable) {
+    public UnsupportedVersionException(String s, Throwable throwable) {
         super(s, throwable);
     }
 
-    public UnsupportedFormatVersionException(Throwable throwable) {
+    public UnsupportedVersionException(Throwable throwable) {
         super(throwable);
     }
 }

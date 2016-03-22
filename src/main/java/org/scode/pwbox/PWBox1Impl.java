@@ -311,7 +311,7 @@ public class PWBox1Impl {
             try {
                 din.readFully(rversion);
                 if (rversion[0] != 1) {
-                    throw new UnsupportedFormatVersionException("only support version 1, got version " + rversion[0]);
+                    throw new UnsupportedVersionException("only support version 1, got version " + rversion[0]);
                 }
             } catch (EOFException e) {
                 throw new TruncatedException("truncated before format version could be read");

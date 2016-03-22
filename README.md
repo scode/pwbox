@@ -4,8 +4,7 @@ Until the above notice is removed and replaced by actual
 documentation, the only reason this code is public is to allow people
 to review the crypto stuff.
 
-Reviewers: See PWBox.java; it has a description of the format and the
-tiny implementation.
+Crypto reviewers: See PWBox.java; it has a description of the format used.
 
 [![Travis Build Status](https://travis-ci.org/scode/pwbox.svg?branch=master)](https://travis-ci.org/scode/pwbox)
 
