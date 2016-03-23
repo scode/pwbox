@@ -139,7 +139,7 @@ public class PWBox1Impl {
     private static final String HMAC_ALGORITHM = "HmacSHA512";
 
     /** Visible for testing. */
-    Key generateKey(String passphrase, byte[] salt) {
+    Key generateKey(final String passphrase, final byte[] salt) {
         final SecretKeyFactory f;
         try {
             f = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY_ALGORITHM);
@@ -174,7 +174,7 @@ public class PWBox1Impl {
     }
 
     /** Visible for testing. */
-    byte[] encrypt(Key k, byte[] iv, byte[] plainText) {
+    byte[] encrypt(final Key k, final byte[] iv, final byte[] plainText) {
         final Cipher c;
         try {
             c = Cipher.getInstance(CIPHER_SPEC);
@@ -196,7 +196,7 @@ public class PWBox1Impl {
     }
 
     /** Visible for testing. */
-    byte[] decrypt(Key k, byte[] iv, byte[] encryptedText) {
+    byte[] decrypt(final Key k, final byte[] iv, final byte[] encryptedText) {
         try {
             final Cipher c = Cipher.getInstance(CIPHER_SPEC);
             c.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
@@ -217,7 +217,7 @@ public class PWBox1Impl {
     }
 
     /** Visible for testing */
-    byte[] hmac(Key k, byte[] text) {
+    byte[] hmac(final Key k, final byte[] text) {
         try {
             final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
             mac.init(k);
@@ -229,7 +229,7 @@ public class PWBox1Impl {
         }
     }
 
-    public byte[] encrypt(String passphrase, byte[] plaintext) throws PWBoxException, PWBoxError {
+    public byte[] encrypt(final String passphrase, final byte[] plaintext) throws PWBoxException, PWBoxError {
         try {
             // Prepare byte arrays of content in the same order as documented in the class docs, and
             // in the same order as the resulting bytes.
@@ -291,7 +291,7 @@ public class PWBox1Impl {
         }
     }
 
-    public byte[] decrypt(String passphrase, byte[] encryptedContent) throws PWBoxException, PWBoxError {
+    public byte[] decrypt(final String passphrase, final byte[] encryptedContent) throws PWBoxException, PWBoxError {
         try {
             final DataInputStream din = new DataInputStream(new ByteArrayInputStream(encryptedContent));
 
