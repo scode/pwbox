@@ -53,22 +53,22 @@ import java.util.Arrays;
  * The format of encrypted data is as follows:
  *
  * <pre>
- *     Byte 00:      'P' ASCII code
- *     Byte 01:      'W" ASCII code
- *     Byte 02:      'B' ASCII code
- *     Byte 03:      'o' ASCII code
- *     Byte 04:      'x' ASCII code
- *     Byte 05:      1, indicating the first version of the PWBox format
- *     Byte 06-21:   16 byte IV used for encrypting the passphrase marker
- *     Byte 22-37:   16 byte IV used for encrypting user provided text
- *     Byte 38-69:   32 byte salt used to generate the key used to encrypt the passphrase marker
- *     Byte 70-101:  32 byte salt used to generate the key used to encrypt the user provided text
- *     Byte 102-133: 32 byte salt used for HMAC key
- *     Byte 134-153: 20 bytes HMAC (SHA1) over iv + encryption key + encrypted text
- *     Byte 154-201: 48 byte encrypted passphrase marker
- *     Byte 202-209: 8 bytes in DataOutputStream.writeLong() format of length of the remainder (for
- *                   truncation detection for user-friendly errors, not HMAC:ed).
- *     Byte 210-EOF: Encrypted text (AES/CBC/PKCS5PADDING)
+ *     'P' ASCII code
+ *     'W" ASCII code
+ *     'B' ASCII code
+ *     'o' ASCII code
+ *     'x' ASCII code
+ *     1, indicating the first version of the PWBox format
+ *     16 byte IV used for encrypting the passphrase marker
+ *     16 byte IV used for encrypting user provided text
+ *     32 byte salt used to generate the key used to encrypt the passphrase marker
+ *     32 byte salt used to generate the key used to encrypt the user provided text
+ *     32 byte salt used for HMAC key
+ *     64 bytes HMAC (SHA512) over iv + encryption key + encrypted text
+ *     48 byte encrypted passphrase marker
+ *     8 bytes in DataOutputStream.writeLong() format of length of the remainder (for
+ *       truncation detection for user-friendly errors, not HMAC:ed).
+ *     Remainder: Encrypted text (AES/CBC/PKCS5PADDING)
  * </pre>
  *
  */
@@ -131,15 +131,11 @@ public class PWBox1Impl {
 
     /**
      * See http://en.wikipedia.org/wiki/PBKDF2 about PBKDF2. bcrypt and scrypt are supposed to be better, but I
-     * went with PBKDF2 because it's very established and because it's available by default in the JDK. Availability
-     * in the JDK goes for SHA1 too.
+     * went with PBKDF2 because it's very established and because it's available by default in the JDK.
      */
-    private static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA1";
+    private static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA512";
 
-    /**
-     * SHA1 due to availability of HmacSHA1 in JDK.
-     */
-    private static final String HMAC_ALGORITHM = "HmacSHA1";
+    private static final String HMAC_ALGORITHM = "HmacSHA512";
 
     /** Visible for testing. */
     Key generateKey(String passphrase, byte[] salt) {
@@ -324,7 +320,7 @@ public class PWBox1Impl {
             final byte[] markerKeySalt = new byte[32];
             final byte[] userKeySalt = new byte[32];
             final byte[] hmacSalt = new byte[32];
-            final byte[] hmac = new byte[20];
+            final byte[] hmac = new byte[512/8]; // 512 comes from HMAC_ALGORITHM
             final byte[] encPphraseMarker = new byte[CORRECT_PASSPHRASE_MARKER_CRYPTED_LENGTH];
 
             try {

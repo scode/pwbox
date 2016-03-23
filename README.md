@@ -54,11 +54,12 @@ follows. This feedback was based on
 `05e2c8e173d479f30c4669dd357fa7e5b7209815`.
 
 With a summary of "I took a look at it this weekend. It's
-good. Solid. With a couple of tweaks, I'd use it.", these specific
-suggestions were provided:
+good. Solid. With a couple of tweaks, I'd use it.", the following
+suggestions were provided.
 
 * Weakness: Where you can, prefer SHA256 to SHA1. Things have changed
   in the past 4 years and SHA1 is going to way of the dodo.
+  * Status: Addressed by moving to SHA512.
 * Weakness: I prefer AES256 to AES128 but it's debatable if it's more
   secure unless you're trying to protect against nation-state
   attackers.
