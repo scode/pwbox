@@ -146,9 +146,8 @@ public class PWBox1Impl {
             final KeySpec ks = new PBEKeySpec(passphrase.toCharArray(), salt, PBE_ITERATION_COUNT, KEY_LENGTH_IN_BITS);
             final SecretKey s = f.generateSecret(ks);
             return new SecretKeySpec(s.getEncoded(), ENCRYPTION_ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
-            throw new PWBoxError(e);
-        } catch (InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException
+                |InvalidKeySpecException e) {
             throw new PWBoxError(e);
         }
     }
@@ -180,17 +179,12 @@ public class PWBox1Impl {
             c = Cipher.getInstance(CIPHER_SPEC);
             c.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(iv));
             return c.doFinal(plainText);
-        } catch (NoSuchAlgorithmException e) {
-            throw new PWBoxError(e);
-        } catch (NoSuchPaddingException e) {
-            throw new PWBoxError(e);
-        } catch (IllegalBlockSizeException e) {
-            throw new PWBoxError(e);
-        } catch (BadPaddingException e) {
-            throw new PWBoxError(e);
-        } catch (InvalidKeyException e) {
-            throw new PWBoxError(e);
-        } catch (InvalidAlgorithmParameterException e) {
+        } catch (NoSuchAlgorithmException
+                |NoSuchPaddingException
+                |IllegalBlockSizeException
+                |BadPaddingException
+                |InvalidKeyException
+                |InvalidAlgorithmParameterException e) {
             throw new PWBoxError(e);
         }
     }
@@ -201,17 +195,12 @@ public class PWBox1Impl {
             final Cipher c = Cipher.getInstance(CIPHER_SPEC);
             c.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
             return c.doFinal(encryptedText);
-        } catch (IllegalBlockSizeException e) {
-            throw new PWBoxError(e);
-        } catch (InvalidKeyException e) {
-            throw new PWBoxError(e);
-        } catch (BadPaddingException e) {
-            throw new PWBoxError(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new PWBoxError(e);
-        } catch (NoSuchPaddingException e) {
-            throw new PWBoxError(e);
-        } catch (InvalidAlgorithmParameterException e) {
+        } catch (IllegalBlockSizeException
+                |InvalidKeyException
+                |BadPaddingException
+                |NoSuchAlgorithmException
+                |NoSuchPaddingException
+                |InvalidAlgorithmParameterException e) {
             throw new PWBoxError(e);
         }
     }
@@ -222,9 +211,8 @@ public class PWBox1Impl {
             final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
             mac.init(k);
             return mac.doFinal(text);
-        } catch (NoSuchAlgorithmException e) {
-            throw new PWBoxError(e);
-        } catch (InvalidKeyException e) {
+        } catch (NoSuchAlgorithmException
+                |InvalidKeyException e) {
             throw new PWBoxError(e);
         }
     }
@@ -284,8 +272,6 @@ public class PWBox1Impl {
             }
 
             return encrypted;
-        } catch (UnsupportedEncodingException e) {
-            throw new PWBoxError(e);
         } catch (IOException e) {
             throw new PWBoxError(e);
         }
@@ -420,8 +406,6 @@ public class PWBox1Impl {
             }
 
             return this.decrypt(userKey, userEncIv, encUserText);
-        } catch (UnsupportedEncodingException e) {
-            throw new PWBoxError(e);
         } catch (IOException e) {
             throw new PWBoxError(e);
         }
