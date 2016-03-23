@@ -53,11 +53,7 @@ import java.util.Arrays;
  * The format of encrypted data is as follows:
  *
  * <pre>
- *     'P' ASCII code
- *     'W" ASCII code
- *     'B' ASCII code
- *     'o' ASCII code
- *     'x' ASCII code
+ *     The string "pwbox: this data is pwbox encrypted\n" in ASCII.
  *     1, indicating the first version of the PWBox format
  *     16 byte IV used for encrypting the passphrase marker
  *     16 byte IV used for encrypting user provided text
@@ -73,6 +69,11 @@ import java.util.Arrays;
  *
  */
 public class PWBox1Impl {
+    /**
+     * Header that should appear at the beginning of pwbox encrypted data.
+     */
+    private static final String PWBOX_HEADER = "pwbox: this data is pwbox encrypted\n";
+
     /** Visible for testing.
      *
      * I chose salt length to be equal to key length on the hypothesis that a salt length larger than the key size
@@ -232,7 +233,7 @@ public class PWBox1Impl {
         try {
             // Prepare byte arrays of content in the same order as documented in the class docs, and
             // in the same order as the resulting bytes.
-            final byte[] magic = "PWBox".getBytes("ASCII");
+            final byte[] magic = PWBOX_HEADER.getBytes("ASCII");
 
             final byte[] version = new byte[1];
             version[0] = 1;
@@ -294,7 +295,7 @@ public class PWBox1Impl {
         try {
             final DataInputStream din = new DataInputStream(new ByteArrayInputStream(encryptedContent));
 
-            final byte[] magic = "PWBox".getBytes("ASCII");
+            final byte[] magic = PWBOX_HEADER.getBytes("ASCII");
             try {
                 final byte[] rmagic = new byte[magic.length];
                 din.readFully(rmagic);
