@@ -69,15 +69,6 @@ public class PWBox1ImplTest {
     }
 
     @Test
-    public void hmacSuccess() throws UnsupportedEncodingException {
-        final PWBox1Impl box = new PWBox1Impl();
-
-        final byte[] salt = box.generateSalt();
-        final Key key = box.generateKey("passphrase", salt);
-        box.hmac(key, "text".getBytes("UTF-8"));
-    }
-
-    @Test
     public void encryptDecrypt() throws UnsupportedEncodingException, PWBoxException {
         final PWBox1Impl box = new PWBox1Impl();
 

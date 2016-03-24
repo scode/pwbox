@@ -191,18 +191,6 @@ public class PWBox1Impl {
         }
     }
 
-    /** Visible for testing */
-    byte[] hmac(final Key k, final byte[] text) {
-        try {
-            final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-            mac.init(k);
-            return mac.doFinal(text);
-        } catch (NoSuchAlgorithmException
-                |InvalidKeyException e) {
-            throw new PWBoxError(e);
-        }
-    }
-
     public byte[] encrypt(final String passphrase, final byte[] plaintext) throws PWBoxException, PWBoxError {
         try {
             // Prepare byte arrays of content in the same order as documented in the class docs, and
