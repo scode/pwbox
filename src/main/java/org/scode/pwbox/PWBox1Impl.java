@@ -255,8 +255,8 @@ public class PWBox1Impl {
                 throw new TruncatedException("truncated before format version could be read");
             }
 
-            final byte[] userEncIv = new byte[16];
-            final byte[] userKeySalt = new byte[32];
+            final byte[] userEncIv = new byte[IV_LENGTH_IN_BYTES];
+            final byte[] userKeySalt = new byte[SALT_LENGTH_IN_BYTES];
 
             try {
                 din.readFully(userEncIv);
