@@ -64,10 +64,22 @@ public class PWBox1Impl {
     static final int SALT_LENGTH_IN_BYTES = 32;
 
     /**
-     * The IV length must be 16 bytes long according to an InvalidAlgorithmParameterException which is otherwise
-     * thrown by the AESCipher (tested on JDK 1.6 on MacOS). I am unfamiliar with the implications cryptographically.
+     * http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf indicates that there is
+     * no upper bound or specific length required or expected:
+     *
+     *    "Another useful property is that it accepts initialization vectors of arbitrary length, which makes it
+     *     easier for applications to meet the requirement that all IVs be distinct. In many situations in which
+     *     authenticated encryption is needed, there is a data element that could be used as a nonce, or as a
+     *     part of a nonce, except that the length of the element(s) may exceed the block size of the cipher. In
+     *     GCM, a nonce of any size can be used as the IV."
+     *
+     * https://tools.ietf.org/html/rfc5288 uses a nonce length of 12. I've found some conflicting statements,
+     * but no indication that larger isn't safe except possibly because there exist implementations that require
+     * 12 bytes (so there might be a compatibility concern).
+     *
+     * 64 bytes (512 bits) seemed like a safe choice.
      */
-    private static final int IV_LENGTH_IN_BYTES = 16;
+    private static final int IV_LENGTH_IN_BYTES = 64;
 
     /**
      * The assumption of PWBox is that small amounts of data are being encrypted and decrypted, meaning that
