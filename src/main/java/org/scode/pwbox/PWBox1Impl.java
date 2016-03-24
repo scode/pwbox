@@ -100,6 +100,7 @@ public class PWBox1Impl {
      *   https://en.wikipedia.org/wiki/Galois/Counter_Mode
      */
     private static final String CIPHER_SPEC = "AES/GCM/NoPadding";
+    private static final int GCM_TAG_LENGTH = 128;
 
     /**
      * See http://en.wikipedia.org/wiki/PBKDF2 about PBKDF2. bcrypt and scrypt are supposed to be better, but I
@@ -148,7 +149,7 @@ public class PWBox1Impl {
         final Cipher c;
         try {
             c = Cipher.getInstance(CIPHER_SPEC);
-            c.init(Cipher.ENCRYPT_MODE, k, new GCMParameterSpec(128, iv));
+            c.init(Cipher.ENCRYPT_MODE, k, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
             return c.doFinal(plainText);
         } catch (NoSuchAlgorithmException
                 |NoSuchPaddingException
@@ -164,7 +165,7 @@ public class PWBox1Impl {
     byte[] decrypt(final Key k, final byte[] iv, final byte[] encryptedText) throws AuthenticationFailedException {
         try {
             final Cipher c = Cipher.getInstance(CIPHER_SPEC);
-            c.init(Cipher.DECRYPT_MODE, k, new GCMParameterSpec(128, iv));
+            c.init(Cipher.DECRYPT_MODE, k, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
             return c.doFinal(encryptedText);
         } catch (AEADBadTagException e) {
             throw new AuthenticationFailedException(e);
