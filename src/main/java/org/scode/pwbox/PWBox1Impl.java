@@ -58,8 +58,8 @@ public class PWBox1Impl {
 
     /** Visible for testing.
      *
-     * I chose salt length to be equal to key length on the hypothesis that a salt length larger than the key size
-     * is useless, and I know of no reason to prefer a smaller one.
+     * I know of no reason to skimp on the salt length, and 32 bytes is firmly above what seems to be the
+     * norm.
      */
     static final int SALT_LENGTH_IN_BYTES = 32;
 
