@@ -2,7 +2,7 @@ package org.scode.pwbox;
 
 import org.scode.pwbox.errors.PWBoxError;
 import org.scode.pwbox.errors.PWBoxException;
-import org.scode.pwbox.errors.ProbablyBadPassphraseException;
+import org.scode.pwbox.errors.AuthenticationFailedException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -51,7 +51,7 @@ public class PWBox1ImplTest {
     }
 
     @Test
-    public void encryptDecryptInternal() {
+    public void encryptDecryptInternal() throws Exception {
         final PWBox1Impl box = new PWBox1Impl();
 
         final byte[] salt = box.generateSalt();
@@ -126,7 +126,7 @@ public class PWBox1ImplTest {
         try {
             box.decrypt("bad passphrase", encrypted);
             throw new AssertionError("decryption should have failed");
-        } catch (ProbablyBadPassphraseException e) {
+        } catch (AuthenticationFailedException e) {
             // ok
         }
     }

@@ -95,6 +95,7 @@ suggestions were provided.
     its evaluation, so you can jettison the whole extra set of data to
     verify the password. Instead, you'd just verify the password by
     trying to decrypt the ciphertext and failing on the first block.
+  * Status: Addressed by switching to AES/GCM/NoPadding.
 * Nitpick: While you explicitly call out memory safety as not an
   issue, you could call, say, clearPassword() on the PBEKeySpec so it
   clears out the password from memory when you're done with it so it
