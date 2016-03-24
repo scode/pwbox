@@ -83,10 +83,14 @@ public class PWBox1Impl {
 
     /**
      * The assumption of PWBox is that small amounts of data are being encrypted and decrypted, meaning that
-     * the performance penalty of a larger key is irrelevant. So, go with 256 bits (instead of 128).
+     * the performance penalty of a larger key is irrelevant. Ordinarily there would be no reason not to go for
+     * a 256 bit key here. However, it appears that depending on the environment, 256 bit keys may fail with
+     * InvalidKeyExceptions. Possibly due to:
      *
-     * TODO(scode): Temporarily set to 128 because 256 generates "illegal key size" on my system, possibly
-     *              due to http://stackoverflow.com/questions/3862800/invalidkeyexception-illegal-key-size
+     *   http://stackoverflow.com/questions/3862800/invalidkeyexception-illegal-key-size
+     *
+     * We reluctantly stick to 128 bits as a result in order to minimize the chance of leaving useres in a
+     * lurch.
      */
     private static final int KEY_LENGTH_IN_BITS = 128;
 
