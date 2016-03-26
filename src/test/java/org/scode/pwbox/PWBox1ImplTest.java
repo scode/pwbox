@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
+import java.util.concurrent.TimeUnit;
 
 public class PWBox1ImplTest {
     @Test
@@ -79,6 +80,35 @@ public class PWBox1ImplTest {
         final byte[] decrypted = box.decrypt(passphrase, encrypted);
 
         Assert.assertEquals(decrypted, plaintext);
+    }
+
+    /**
+     * In order to run a meaninful number of iterations, and to enable printing results, increase this to a higher
+     * number.
+     */
+    private static final int PERF_TEST_ITERATION_COUNT = 1;
+    @Test
+    public void keyStretchingPerfTest() throws Exception {
+        // Spend a relatively small amount of time on warm-up.
+        for (int i = 0; i < PERF_TEST_ITERATION_COUNT / 20; i++) {
+            final PWBox1Impl box = new PWBox1Impl();
+            final byte[] encrypted = box.encrypt("passphrase", "s".getBytes("UTF-8"));
+        }
+
+        final long startTime = System.nanoTime();
+        for (int i = 0; i < PERF_TEST_ITERATION_COUNT; i++) {
+            final PWBox1Impl box = new PWBox1Impl();
+            final byte[] encrypted = box.encrypt("passphrase", "s".getBytes("UTF-8"));
+        }
+        final long stopTime = System.nanoTime();
+
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
+        final long persec = PERF_TEST_ITERATION_COUNT * elapsedMillis / 1000;
+
+        if (PERF_TEST_ITERATION_COUNT > 1) { // suppress false claim unless iteration count has been modified
+            System.out.println("" + PERF_TEST_ITERATION_COUNT + " in " + elapsedMillis + " ms -> "
+                    + persec + " per second");
+        }
     }
 
     @Test

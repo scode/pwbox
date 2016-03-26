@@ -118,10 +118,9 @@ public class PWBox1Impl {
 
     /**
      * Key stretching iteration count. The higher the more resilience you get against bruce force attacks against
-     * a poor passphrase. I chose 10000 ba
-     * sed on ad-hoc performance measurements on my MacBook. Essentially, "unit
-     * tests still run reasonably fast, so it's okay for the end-user that only needs to wait for a handful of
-     * key generations".
+     * a poor passphrase.
+     *
+     * 10000 yields about 500 encryptions per second (see keyStretchingPerfTest) on a 2016 macbook pro.
      */
     private static final int PBE_ITERATION_COUNT = 10000;
 
