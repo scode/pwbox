@@ -106,5 +106,6 @@ suggestions were provided.
   issue, you could call, say, clearPassword() on the PBEKeySpec so it
   clears out the password from memory when you're done with it so it
   doesn't sit around in your vm waiting to be gc'd.
+** Status: Done, but this is no guarantee and is a nice-to-have only.
 * Nitpick: the constants could be derived from places already in the
   core Java crypto primitives.

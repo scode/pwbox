@@ -153,9 +153,17 @@ public class PWBox1Impl {
         final SecretKeyFactory f;
         try {
             f = SecretKeyFactory.getInstance(SECRET_KEY_FACTORY_ALGORITHM);
-            final KeySpec ks = new PBEKeySpec(passphrase.toCharArray(), salt, PBE_ITERATION_COUNT, KEY_LENGTH_IN_BITS);
-            final SecretKey s = f.generateSecret(ks);
-            return new SecretKeySpec(s.getEncoded(), ENCRYPTION_ALGORITHM);
+            final PBEKeySpec ks = new PBEKeySpec(passphrase.toCharArray(), salt, PBE_ITERATION_COUNT, KEY_LENGTH_IN_BITS);
+            final SecretKey k;
+            try {
+                k = f.generateSecret(ks);
+            } finally {
+                // Avoid keeping the user's passphrase around longer than necessary. This is a "we might as well" and
+                // should never be relied upon as there is no guarantee provided (e.g. copying GC, we might have been
+                // paged to disk, etc). We do not attempt or advertise resillience against local attacks.
+                ks.clearPassword();
+            }
+            return new SecretKeySpec(k.getEncoded(), ENCRYPTION_ALGORITHM);
         } catch (NoSuchAlgorithmException
                 |InvalidKeySpecException e) {
             throw new PWBoxError(e);
