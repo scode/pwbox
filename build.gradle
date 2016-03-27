@@ -1,6 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'jacoco'
 
+configurations {
+    asciidoclet
+}
+
 allprojects {
     tasks.withType(JavaCompile) {
         sourceCompatibility = '1.7'
@@ -14,6 +18,12 @@ repositories {
 
 dependencies {
     testCompile group: 'org.testng', name: 'testng', version: '6.9.4'
+    asciidoclet 'org.asciidoctor:asciidoclet:1.5.4'
+}
+
+javadoc {
+    options.docletpath = configurations.asciidoclet.files.asType(List)
+    options.doclet = 'org.asciidoctor.Asciidoclet'
 }
 
 test {

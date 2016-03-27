@@ -11,10 +11,8 @@ import org.scode.pwbox.errors.PWBoxException;
  *
  * Here is a simple example (minus exception handling):
  *
- * <pre>
  *     byte[] encrypted = PWBox.encrypt(PWBox.Version.LATEST, "passphrase", "secret".getBytes("UTF-8"));
  *     byte[] plain = PWBox.decrypt("passphrase", encrypted);
- * </pre>
  *
  * @see PWBoxException
  * @see PWBoxError

@@ -61,7 +61,7 @@ import java.util.Arrays;
  *
  * The format of encrypted data is as follows:
  *
- * <pre>
+ *
  *     The string "pwbox: this data is pwbox encrypted\n" in ASCII.
  *     1, indicating the first version of the PWBox format
  *     16 byte IV used for encrypting user provided text (TODO: appropriate IV size with GCM?)
@@ -69,7 +69,6 @@ import java.util.Arrays;
  *     8 bytes in DataOutputStream.writeLong() format of length of the remainder (for
  *       truncation detection for user-friendly errors, not HMAC:ed).
  *     Remainder: Encrypted text (AES/GCM/NoPadding)
- * </pre>
  *
  */
 public class PWBox1Impl {
