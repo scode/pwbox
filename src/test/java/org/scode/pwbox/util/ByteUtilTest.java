@@ -25,6 +25,16 @@ public class ByteUtilTest {
     }
 
     @Test
+    public void fromHexInvalidCharacter() {
+        try {
+            ByteUtil.fromHex("q");
+            throw new AssertionError("should not be reached");
+        } catch (ByteUtil.InvalidHexException e) {
+            // expected
+        }
+    }
+
+    @Test
     public void allBytesPreserved() throws ByteUtil.InvalidHexException {
         final byte[] allBytes = new byte[Byte.MAX_VALUE + 1];
 
