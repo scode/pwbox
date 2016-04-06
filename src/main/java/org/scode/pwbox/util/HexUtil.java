@@ -8,7 +8,7 @@ public class HexUtil {
     }
 
     public static String toHex(final byte[] bytes) {
-        final StringBuffer buf = new StringBuffer();
+        final StringBuilder buf = new StringBuilder();
 
         for(byte b : bytes) {
             buf.append(Character.forDigit((b >> 4) & 0xF, 16));

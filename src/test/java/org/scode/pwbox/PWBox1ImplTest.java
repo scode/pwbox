@@ -171,7 +171,7 @@ public class PWBox1ImplTest {
         // the original hex which appears inline in the second arm of the if.
         if (true) { // TODO(scode): See KEY_LENGTH_IN_BITS
             final byte[] encrypted = box.encrypt(passphrase, plaintext);
-            final StringBuffer hex = new StringBuffer();
+            final StringBuilder hex = new StringBuilder();
             for (byte b : encrypted) {
                 hex.append(String.format("%02x", b));
             }
