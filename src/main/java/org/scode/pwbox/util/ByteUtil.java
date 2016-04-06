@@ -1,7 +1,5 @@
 package org.scode.pwbox.util;
 
-import java.security.InvalidKeyException;
-
 public class ByteUtil {
     public static class InvalidHexException extends Exception {
         public InvalidHexException(String msg) {
