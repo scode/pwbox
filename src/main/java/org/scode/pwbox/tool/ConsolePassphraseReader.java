@@ -1,6 +1,4 @@
-package org.scode.pwbox.errors.tool;
-
-import java.io.Console;
+package org.scode.pwbox.tool;
 
 public class ConsolePassphraseReader implements IPassphraseReader {
     @Override

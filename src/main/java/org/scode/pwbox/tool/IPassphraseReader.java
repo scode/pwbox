@@ -1,4 +1,4 @@
-package org.scode.pwbox.errors.tool;
+package org.scode.pwbox.tool;
 
 public interface IPassphraseReader {
     String readPassphrase();
