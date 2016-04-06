@@ -1,6 +1,6 @@
 package org.scode.pwbox.util;
 
-public class ByteUtil {
+public class HexUtil {
     public static class InvalidHexException extends Exception {
         public InvalidHexException(String msg) {
             super(msg);
