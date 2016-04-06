@@ -144,8 +144,6 @@ public class PWBox1Impl {
      */
     private static final String SECRET_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA512";
 
-    private static final String HMAC_ALGORITHM = "HmacSHA512";
-
     /** Visible for testing. */
     Key generateKey(final String passphrase, final byte[] salt) {
         final SecretKeyFactory f;
