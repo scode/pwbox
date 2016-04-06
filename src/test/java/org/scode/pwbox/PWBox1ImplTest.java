@@ -12,6 +12,14 @@ import java.util.concurrent.TimeUnit;
 
 public class PWBox1ImplTest {
     @Test
+    public void encryptDecryptString() throws Exception {
+        final PWBox1Impl box = new PWBox1Impl();
+
+        Assert.assertEquals(box.decryptString("pass", box.encryptString("pass", "plaintext".getBytes())),
+                "plaintext".getBytes());
+    }
+
+    @Test
     public void saltGenerationLength() {
         final PWBox1Impl box = new PWBox1Impl();
 

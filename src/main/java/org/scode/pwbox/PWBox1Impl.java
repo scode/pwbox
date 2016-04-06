@@ -1,13 +1,14 @@
 package org.scode.pwbox;
 
 import org.scode.pwbox.errors.AuthenticationFailedException;
+import org.scode.pwbox.errors.InvalidFormatException;
 import org.scode.pwbox.errors.InvalidMagicException;
 import org.scode.pwbox.errors.PWBoxError;
 import org.scode.pwbox.errors.PWBoxException;
 import org.scode.pwbox.errors.TrailingGarbageException;
 import org.scode.pwbox.errors.TruncatedException;
 import org.scode.pwbox.errors.UnsupportedDataLengthException;
-import org.scode.pwbox.errors.UnsupportedVersionException;
+import org.scode.pwbox.util.HexUtil;
 
 import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
@@ -72,10 +73,8 @@ import java.util.Arrays;
  *
  */
 public class PWBox1Impl {
-    /**
-     * Header that should appear at the beginning of pwbox encrypted data.
-     */
-    private static final String PWBOX_HEADER = "pwbox: this data is pwbox encrypted\n";
+    private static final String PWBOX_HEADER = "======================== pwbox-begin: format vUNSTABLE ========================\n";
+    private static final String PWBOX_FOOTER = "======================== pwbox-end:   format vUNSTABLE ========================\n";
 
     /** Visible for testing.
      *
@@ -221,15 +220,16 @@ public class PWBox1Impl {
         }
     }
 
-    public byte[] encrypt(final String passphrase, final byte[] plaintext) throws PWBoxException, PWBoxError {
+    public String encryptString(final String passphrase, final byte[] plaintext) throws PWBoxException, PWBoxError {
+        final byte[] encrypted = encrypt(passphrase, plaintext);
+        final String hexed = HexUtil.toLenientHex(HexUtil.toHex(encrypted));
+
+        return PWBOX_HEADER + hexed + PWBOX_FOOTER;
+    }
+
+    /** Visible for testing. */
+    byte[] encrypt(final String passphrase, final byte[] plaintext) throws PWBoxException, PWBoxError {
         try {
-            // Prepare byte arrays of content in the same order as documented in the class docs, and
-            // in the same order as the resulting bytes.
-            final byte[] magic = PWBOX_HEADER.getBytes("ASCII");
-
-            final byte[] version = new byte[1];
-            version[0] = 1;
-
             final byte[] userEncIv = this.generateIv();
             final byte[] userKeySalt = this.generateSalt();
 
@@ -239,8 +239,6 @@ public class PWBox1Impl {
 
             final ByteArrayOutputStream bout = new ByteArrayOutputStream();
             final DataOutputStream dout = new DataOutputStream(bout);
-            dout.write(magic);
-            dout.write(version);
             dout.write(userEncIv);
             dout.write(userKeySalt);
             dout.writeLong(encUserText.length);
@@ -260,30 +258,27 @@ public class PWBox1Impl {
         }
     }
 
-    public byte[] decrypt(final String passphrase, final byte[] encryptedContent) throws PWBoxException, PWBoxError {
+    public byte[] decryptString(final String passphrase, final String encryptedString) throws PWBoxException, PWBoxError {
+        if (!encryptedString.startsWith(PWBOX_HEADER)) {
+            throw new InvalidMagicException("invalid format; must begin with valid header");
+        }
+        if (!encryptedString.endsWith(PWBOX_FOOTER)) {
+            throw new InvalidMagicException("invalid format; must end with valid footer");
+        }
+
+        try {
+            return decrypt(passphrase,
+                    HexUtil.fromHex(HexUtil.fromLenientHex(encryptedString.substring(PWBOX_HEADER.length(),
+                    encryptedString.length() - 1 - PWBOX_FOOTER.length()))));
+        } catch (HexUtil.InvalidHexException e) {
+            throw new InvalidFormatException(e);
+        }
+    }
+
+    /** Visible for testing. */
+    byte[] decrypt(final String passphrase, final byte[] encryptedContent) throws PWBoxException, PWBoxError {
         try {
             final DataInputStream din = new DataInputStream(new ByteArrayInputStream(encryptedContent));
-
-            final byte[] magic = PWBOX_HEADER.getBytes("ASCII");
-            try {
-                final byte[] rmagic = new byte[magic.length];
-                din.readFully(rmagic);
-                if (!Arrays.equals(magic, rmagic)) {
-                    throw new InvalidMagicException("invalid magic - not PWBox data?");
-                }
-            } catch (EOFException e) {
-                throw new InvalidMagicException("input data did not contain magic indicating it is PWBox data - too short");
-            }
-
-            final byte[] rversion = new byte[1];
-            try {
-                din.readFully(rversion);
-                if (rversion[0] != 1) {
-                    throw new UnsupportedVersionException("only support version 1, got version " + rversion[0]);
-                }
-            } catch (EOFException e) {
-                throw new TruncatedException("truncated before format version could be read");
-            }
 
             final byte[] userEncIv = new byte[IV_LENGTH_IN_BYTES];
             final byte[] userKeySalt = new byte[SALT_LENGTH_IN_BYTES];
