@@ -27,4 +27,19 @@ public class IOUtilTest {
 
         Assert.assertEquals(out.toByteArray(), "hello".getBytes());
     }
+
+    @Test
+    public void testLargerThanBuffer() throws IOException {
+        final StringBuilder builder = new StringBuilder();
+        while (builder.length() < 2 * IOUtil.IO_BUF_SIZE) {
+            builder.append("hello");
+        }
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final ByteArrayInputStream in = new ByteArrayInputStream(builder.toString().getBytes());
+
+        IOUtil.pipe(in, out);
+
+        Assert.assertEquals(out.toByteArray(), builder.toString().getBytes());
+    }
 }

@@ -8,7 +8,8 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 
 public class IOUtil {
-    private static final int IO_BUF_SIZE = 1024;
+    /** Visible for testing. */
+    static final int IO_BUF_SIZE = 1024;
 
     public static void pipe(InputStream in, OutputStream out) throws IOException {
         final byte[] buf = new byte[IO_BUF_SIZE];
