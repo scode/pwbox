@@ -25,11 +25,16 @@ public class IOUtil {
         }
     }
 
-    public static byte[] slurp(Path p) throws IOException {
-        try(final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            final FileInputStream fin = new FileInputStream(p.toFile())) {
-            pipe(fin, bout);
+    public static byte[] slurp(InputStream in) throws IOException {
+        try(final ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+            pipe(in, bout);
             return bout.toByteArray();
+        }
+    }
+
+    public static byte[] slurp(Path p) throws IOException {
+        try(final FileInputStream fin = new FileInputStream(p.toFile())) {
+            return slurp(fin);
         }
     }
 }
